@@ -4,6 +4,30 @@ use std::str::FromStr;
 type Error = Box<dyn std::error::Error>;
 type Result<T> = std::result::Result<T, Error>;
 
+#[derive(Debug, PartialEq)]
+struct Seat {
+    row: usize,
+    col: usize,
+    seat_id: usize,
+}
+
+impl FromStr for Seat {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Seat> {
+        let boarding_pass = s
+            .to_string()
+            .replace(&(['F', 'L'][..]), "0")
+            .replace(&['B', 'R'][..], "1");
+        let seat_id = usize::from_str_radix(&boarding_pass, 2)?;
+        Ok(Seat {
+            row: seat_id / 8,
+            col: seat_id % 8,
+            seat_id: seat_id,
+        })
+    }
+}
+
 fn main() -> Result<()> {
     let contents = get_contents("input")?;
 
@@ -19,7 +43,7 @@ fn main() -> Result<()> {
 
     // part 2
     seats.sort_by(|a, b| a.seat_id.partial_cmp(&b.seat_id).unwrap());
-    let open_seat = seats.windows(3).fold(0, |acc, x| {
+    let open_seat = seats.windows(2).fold(0, |acc, x| {
         if x[0].seat_id + 1 != x[1].seat_id {
             x[1].seat_id - 1
         } else {
@@ -40,32 +64,6 @@ fn get_contents(filename: &str) -> Result<String> {
     f.read_to_string(&mut contents)?;
 
     Ok(contents)
-}
-
-#[derive(Debug, PartialEq)]
-struct Seat {
-    row: usize,
-    col: usize,
-    seat_id: usize,
-}
-
-impl FromStr for Seat {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Seat> {
-        let boarding_pass = s.to_string();
-        let seat_id = usize::from_str_radix(
-            &boarding_pass
-                .replace(&(['F', 'L'][..]), "0")
-                .replace(&['B', 'R'][..], "1"),
-            2,
-        )?;
-        Ok(Seat {
-            row: seat_id / 8,
-            col: seat_id % 8,
-            seat_id: seat_id,
-        })
-    }
 }
 
 #[cfg(test)]
