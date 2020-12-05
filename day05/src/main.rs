@@ -17,7 +17,7 @@ impl FromStr for Seat {
     fn from_str(s: &str) -> Result<Seat> {
         let boarding_pass = s
             .to_string()
-            .replace(&(['F', 'L'][..]), "0")
+            .replace(&['F', 'L'][..], "0")
             .replace(&['B', 'R'][..], "1");
         let seat_id = usize::from_str_radix(&boarding_pass, 2)?;
         Ok(Seat {
@@ -31,10 +31,7 @@ impl FromStr for Seat {
 fn main() -> Result<()> {
     let contents = get_contents("input")?;
 
-    let mut seats: Vec<Seat> = contents
-        .lines()
-        .map(|x| x.parse::<Seat>().unwrap())
-        .collect();
+    let mut seats: Vec<Seat> = contents.lines().map(|x| x.parse().unwrap()).collect();
 
     // part 1
     let max_id = seats.iter().fold(0, |acc, x| std::cmp::max(acc, x.seat_id));
@@ -43,13 +40,14 @@ fn main() -> Result<()> {
 
     // part 2
     seats.sort_by(|a, b| a.seat_id.partial_cmp(&b.seat_id).unwrap());
-    let open_seat = seats.windows(2).fold(0, |acc, x| {
-        if x[0].seat_id + 1 != x[1].seat_id {
-            x[1].seat_id - 1
-        } else {
-            acc
-        }
-    });
+
+    let open_seat = seats
+        .windows(2)
+        .filter(|x| x[0].seat_id + 1 != x[1].seat_id)
+        .next()
+        .unwrap()[0]
+        .seat_id
+        + 1;
 
     dbg!(open_seat);
 
