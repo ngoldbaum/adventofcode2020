@@ -26,7 +26,7 @@ fn main() -> Result<()> {
     let mut seats: Vec<Seat> = contents.lines().map(|x| x.parse().unwrap()).collect();
 
     // part 1
-    let max_id = seats.iter().fold(0, |acc, x| std::cmp::max(acc, x.0));
+    let max_id = seats.iter().fold(0, |acc, Seat(x)| std::cmp::max(acc, *x));
 
     dbg!(max_id);
 
