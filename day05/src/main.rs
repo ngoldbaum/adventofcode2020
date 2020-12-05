@@ -4,12 +4,8 @@ use std::str::FromStr;
 type Error = Box<dyn std::error::Error>;
 type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug, PartialEq)]
-struct Seat {
-    row: usize,
-    col: usize,
-    seat_id: usize,
-}
+#[derive(Debug, PartialEq, PartialOrd)]
+struct Seat(usize);
 
 impl FromStr for Seat {
     type Err = Error;
@@ -20,11 +16,7 @@ impl FromStr for Seat {
             .replace(&['F', 'L'][..], "0")
             .replace(&['B', 'R'][..], "1");
         let seat_id = usize::from_str_radix(&boarding_pass, 2)?;
-        Ok(Seat {
-            row: seat_id / 8,
-            col: seat_id % 8,
-            seat_id: seat_id,
-        })
+        Ok(Seat(seat_id))
     }
 }
 
@@ -34,20 +26,19 @@ fn main() -> Result<()> {
     let mut seats: Vec<Seat> = contents.lines().map(|x| x.parse().unwrap()).collect();
 
     // part 1
-    let max_id = seats.iter().fold(0, |acc, x| std::cmp::max(acc, x.seat_id));
+    let max_id = seats.iter().fold(0, |acc, x| std::cmp::max(acc, x.0));
 
     dbg!(max_id);
 
     // part 2
-    seats.sort_by(|a, b| a.seat_id.partial_cmp(&b.seat_id).unwrap());
+    seats.sort_by(|a, b| a.partial_cmp(&b).unwrap());
 
-    let open_seat = seats
+    let Seat(open_seat) = seats
         .windows(2)
-        .filter(|x| x[0].seat_id + 1 != x[1].seat_id)
+        .filter(|x| x[0].0 + 1 != x[1].0)
         .next()
-        .unwrap()[0]
-        .seat_id
-        + 1;
+        .unwrap()[0];
+    let open_seat = open_seat + 1;
 
     dbg!(open_seat);
 
@@ -70,29 +61,8 @@ mod tests {
 
     #[test]
     fn test_row_col() {
-        assert!(
-            "BFFFBBFRRR".parse::<Seat>().unwrap()
-                == Seat {
-                    row: 70,
-                    col: 7,
-                    seat_id: 567,
-                }
-        );
-        assert!(
-            "FFFBBBFRRR".parse::<Seat>().unwrap()
-                == Seat {
-                    row: 14,
-                    col: 7,
-                    seat_id: 119,
-                }
-        );
-        assert!(
-            "BBFFBBFRLL".parse::<Seat>().unwrap()
-                == Seat {
-                    row: 102,
-                    col: 4,
-                    seat_id: 820,
-                }
-        );
+        assert!("BFFFBBFRRR".parse::<Seat>().unwrap() == Seat(567));
+        assert!("FFFBBBFRRR".parse::<Seat>().unwrap() == Seat(119));
+        assert!("BBFFBBFRLL".parse::<Seat>().unwrap() == Seat(820));
     }
 }
