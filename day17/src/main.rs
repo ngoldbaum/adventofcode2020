@@ -5,6 +5,7 @@ type Result<T> = std::result::Result<T, Error>;
 
 fn main() -> Result<()> {
     let contents = get_contents("input.test")?;
+    let contents = contents.trim();
 
     println!("{}", contents);
 
