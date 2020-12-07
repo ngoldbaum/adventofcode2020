@@ -13,13 +13,7 @@ fn main() -> Result<()> {
     // part 1
     let p1groups = groups
         .iter()
-        .map(|g| {
-            HashSet::from_iter(
-                g.split("\n")
-                    .map(|p| p.chars().collect::<Vec<char>>())
-                    .flatten(),
-            )
-        })
+        .map(|g| HashSet::from_iter(g.split("\n").map(|p| p.chars()).flatten()))
         .collect::<Vec<HashSet<char>>>();
 
     dbg!(p1groups.iter().map(|g| g.len()).sum::<usize>());
