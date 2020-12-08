@@ -1,7 +1,6 @@
-use std::io::Read;
+use anyhow::Result;
 
-type Error = Box<dyn std::error::Error>;
-type Result<T> = std::result::Result<T, Error>;
+use std::io::Read;
 
 fn main() -> Result<()> {
     let contents = get_contents("input.test")?;
