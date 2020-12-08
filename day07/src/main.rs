@@ -24,11 +24,9 @@ fn main() -> Result<()> {
                 .rsplit(" bags contain ")
                 .next()
                 .unwrap();
-            let contents: HashMap<String, usize>;
-            if scontents == "no other bags" {
-                contents = HashMap::new();
-            } else {
-                contents = HashMap::from_iter(scontents.split(", ").map(|b| {
+            let contents: HashMap<String, usize> = match scontents {
+                "no other bags" => HashMap::new(),
+                _ => HashMap::from_iter(scontents.split(", ").map(|b| {
                     let mut it = b
                         .trim_end_matches(" bags")
                         .trim_end_matches(" bag")
@@ -36,8 +34,8 @@ fn main() -> Result<()> {
                     let count = it.next().unwrap();
                     let color = it.collect::<Vec<&str>>().join(" ");
                     (color, count.parse::<usize>().unwrap())
-                }));
-            }
+                })),
+            };
             Bag {
                 color: color,
                 contents: contents,
@@ -45,6 +43,7 @@ fn main() -> Result<()> {
         })
         .collect();
 
+    // part 1
     let mut nleaves = 0;
 
     for b in &all_bags {
