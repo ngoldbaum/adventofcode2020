@@ -20,14 +20,14 @@ fn main() -> Result<()> {
 
     let p1 = match stream[..].windows(npreamble + 1).try_for_each(|w| {
         let preamble = &w[..npreamble];
-        let test_digit = &w[npreamble];
+        let test_digit = w[npreamble];
         match preamble
             .iter()
             .combinations(2)
-            .any(|c| c[0] + c[1] == *test_digit)
+            .any(|c| c[0] + c[1] == test_digit)
         {
             true => Ok(()),
-            false => Err(*test_digit),
+            false => Err(test_digit),
         }
     }) {
         Ok(_) => panic!(),
@@ -38,8 +38,8 @@ fn main() -> Result<()> {
 
     if let Some((i, j)) = (0..stream.len())
         .flat_map(|i| (i..stream.len()).map(move |j| (i, j)))
-        .find(|(i, j)| {
-            let s: usize = stream[*i..*j].iter().sum();
+        .find(|&(i, j)| {
+            let s: usize = stream[i..j].iter().sum();
             s == p1
         })
     {
