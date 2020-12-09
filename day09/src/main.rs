@@ -36,24 +36,15 @@ fn main() -> Result<()> {
 
     // part 2
 
-    let mut i = 0;
-    let mut j;
-
-    'outer: loop {
-        j = i + 1;
-        'inner: loop {
-            let s: usize = stream[i..j].iter().sum();
-            if s > p1 {
-                break 'inner;
-            } else if s == p1 {
-                break 'outer;
-            }
-            j += 1;
-        }
-        i += 1;
+    if let Some((i, j)) = (0..stream.len())
+        .flat_map(|i| (i..stream.len()).map(move |j| (i, j)))
+        .find(|(i, j)| {
+            let s: usize = stream[*i..*j].iter().sum();
+            s == p1
+        })
+    {
+        dbg!(stream[i..j].iter().min().unwrap() + stream[i..j].iter().max().unwrap());
     }
-
-    dbg!(stream[i..j].iter().min().unwrap() + stream[i..j].iter().max().unwrap());
 
     Ok(())
 }
