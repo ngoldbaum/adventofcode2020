@@ -38,12 +38,14 @@ fn main() -> Result<()> {
 
     if let Some((i, j)) = (0..stream.len())
         .flat_map(|i| (i..stream.len()).map(move |j| (i, j)))
-        .find(|&(i, j)| {
-            let s: usize = stream[i..j].iter().sum();
-            s == p1
-        })
+        .find(|&(i, j)| stream[i..j].iter().sum::<usize>() == p1)
     {
-        dbg!(stream[i..j].iter().min().unwrap() + stream[i..j].iter().max().unwrap());
+        match stream[i..j].iter().minmax() {
+            itertools::MinMaxResult::MinMax(min, max) => {
+                dbg!(min + max);
+            }
+            _ => panic!(),
+        }
     }
 
     Ok(())
