@@ -19,28 +19,23 @@ fn main() -> Result<()> {
 
     adapters
         .windows(2)
-        .map(|w| *differences.entry(w[1] - w[0]).or_insert(0) += 1)
-        .for_each(|_| ());
+        .for_each(|w| *differences.entry(w[1] - w[0]).or_insert(0) += 1);
 
     dbg!(differences[&3] * differences[&1]);
 
     // part 2
     let mut counts: HashMap<i64, i64> = HashMap::new();
     counts.insert(0, 1);
-    adapters
-        .iter()
-        .enumerate()
-        .skip(1)
-        .map(|(i, &jolt)| {
-            let new_count = adapters[..i]
+    adapters.iter().enumerate().skip(1).for_each(|(i, &jolt)| {
+        counts.insert(
+            jolt,
+            adapters[..i]
                 .iter()
                 .filter(|&&oj| oj < jolt && oj >= (jolt - 3))
                 .map(|&m| counts[&m])
-                .sum();
-
-            counts.insert(jolt, new_count);
-        })
-        .for_each(|_| ());
+                .sum(),
+        );
+    });
 
     dbg!(counts[&max]);
 
