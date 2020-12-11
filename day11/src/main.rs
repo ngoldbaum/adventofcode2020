@@ -7,28 +7,32 @@ struct Arena(Vec<Vec<Option<i32>>>);
 impl Arena {
     fn step(&mut self) {
         let grid = &mut self.0;
-        let (ncol, nrow): (i32, i32) = (grid.len() as i32, grid[0].len() as i32);
-        let grid_indices = (0..ncol)
-            .flat_map(|i| (0..nrow).map(move |j| (i, j)))
-            .collect::<Vec<(i32, i32)>>();
-        let offsets = (-1..2)
-            .flat_map(|i| (-1..2).map(move |j| (i, j)))
-            .filter(|&c| c != (0, 0))
+        let (nrow, ncol): (i32, i32) = (grid.len() as i32, grid[0].len() as i32);
+        let grid_indices = (0..nrow)
+            .flat_map(|i| (0..ncol).map(move |j| (i, j)))
             .collect::<Vec<(i32, i32)>>();
         let counts: Vec<i32> = grid_indices
             .iter()
-            .map(|(i, j)| {
-                offsets
-                    .iter()
-                    .map(|(di, dj)| (i + di, j + dj))
-                    .filter(|c| {
-                        grid_indices.contains(c) && !grid[c.0 as usize][c.1 as usize].is_none()
-                    })
-                    .map(|(ti, tj)| match grid[ti as usize][tj as usize] {
-                        Some(c) => c,
-                        None => 0,
-                    })
-                    .sum::<i32>()
+            .map(|&(i, j)| {
+                let mut iters: Vec<Box<dyn std::iter::Iterator<Item = (i32, i32)>>> = vec![
+                    Box::new((0..i).rev().zip(std::iter::repeat(j))),
+                    Box::new((i + 1..ncol).zip(std::iter::repeat(j))),
+                    Box::new(std::iter::repeat(i).zip(j + 1..nrow)),
+                    Box::new(std::iter::repeat(i).zip((0..j).rev())),
+                    Box::new((i + 1..ncol).zip(j + 1..nrow)),
+                    Box::new((i + 1..ncol).zip((0..j).rev())),
+                    Box::new((0..i).rev().zip(j + 1..nrow)),
+                    Box::new((0..i).rev().zip((0..j).rev())),
+                ];
+                iters
+                    .iter_mut()
+                    .map(
+                        |iter| match iter.find_map(|(ii, jj)| grid[ii as usize][jj as usize]) {
+                            Some(c) => c,
+                            None => 0,
+                        },
+                    )
+                    .sum()
             })
             .collect();
         grid_indices
@@ -39,7 +43,7 @@ impl Arena {
                     if c == 0 && ac == 0 {
                         grid[i as usize][j as usize] = Some(1);
                     }
-                    if c == 1 && ac >= 4 {
+                    if c == 1 && ac > 4 {
                         grid[i as usize][j as usize] = Some(0);
                     }
                 }
