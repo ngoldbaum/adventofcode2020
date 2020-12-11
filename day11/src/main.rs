@@ -2,6 +2,7 @@ use anyhow::Result;
 
 use std::io::Read;
 
+#[derive(Debug, PartialEq, Clone)]
 struct Arena(Vec<Vec<Option<usize>>>);
 
 impl Arena {
@@ -62,30 +63,37 @@ impl Arena {
     }
 }
 
+impl std::str::FromStr for Arena {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Arena> {
+        Ok(Arena(
+            s.lines()
+                .map(|l| {
+                    l.chars()
+                        .map(|c| match c {
+                            'L' => Some(0),
+                            '.' => None,
+                            _ => panic!(),
+                        })
+                        .collect()
+                })
+                .collect(),
+        ))
+    }
+}
+
 fn main() -> Result<()> {
     let contents = get_contents("input")?;
     let contents = contents.trim();
 
-    let mut grid: Arena = Arena(
-        contents
-            .lines()
-            .map(|l| {
-                l.chars()
-                    .map(|c| match c {
-                        'L' => Some(0),
-                        '.' => None,
-                        _ => panic!(),
-                    })
-                    .collect()
-            })
-            .collect(),
-    );
+    let mut grid: Arena = contents.parse()?;
 
     loop {
-        let last_step = grid.0.clone();
+        let last_step = grid.clone();
         grid.step();
 
-        if last_step == grid.0 {
+        if last_step == grid {
             dbg!(grid.sum());
             break;
         }
